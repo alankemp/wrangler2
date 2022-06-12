@@ -839,7 +839,7 @@ describe("wrangler dev", () => {
               --routes, --route                            Routes to upload  [array]
               --host                                       Host to forward requests to, defaults to the zone of project  [string]
               --local-protocol                             Protocol to listen to requests on, defaults to http.  [choices: \\"http\\", \\"https\\"]
-              --experimental-public                        Static assets to be served  [string]
+              --assets                                     Static assets to be served  [string]
               --site                                       Root folder of static assets for Workers Sites  [string]
               --site-include                               Array of .gitignore-style patterns that match file or directory names from the sites directory. Only matched items will be uploaded.  [array]
               --site-exclude                               Array of .gitignore-style patterns that match file or directory names from the sites directory. Matched items will not be uploaded.  [array]
@@ -857,19 +857,19 @@ describe("wrangler dev", () => {
       `);
     });
 
-    it("should error if --experimental-public and --site are used together", async () => {
+    it("should error if --assets and --site are used together", async () => {
       writeWranglerToml({
         main: "./index.js",
       });
       fs.writeFileSync("index.js", `export default {};`);
       await expect(
-        runWrangler("dev --experimental-public abc --site xyz")
+        runWrangler("dev --assets abc --site xyz")
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot use --experimental-public and a Site configuration together."`
+        `"Cannot use Assets and Workers Sites in the same Worker."`
       );
     });
 
-    it("should error if --experimental-public and config.site are used together", async () => {
+    it("should error if --assets and config.site are used together", async () => {
       writeWranglerToml({
         main: "./index.js",
         site: {
@@ -878,9 +878,38 @@ describe("wrangler dev", () => {
       });
       fs.writeFileSync("index.js", `export default {};`);
       await expect(
-        runWrangler("dev --experimental-public abc")
+        runWrangler("dev --assets abc")
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot use --experimental-public and a Site configuration together."`
+        `"Cannot use Assets and Workers Sites in the same Worker."`
+      );
+    });
+
+    it("should error if config.assets and --site are used together", async () => {
+      writeWranglerToml({
+        main: "./index.js",
+        assets: "abc",
+      });
+      fs.writeFileSync("index.js", `export default {};`);
+      await expect(
+        runWrangler("dev --site xyz")
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot use Assets and Workers Sites in the same Worker."`
+      );
+    });
+
+    it("should error if config.assets and config.site are used together", async () => {
+      writeWranglerToml({
+        main: "./index.js",
+        assets: "abc",
+        site: {
+          bucket: "xyz",
+        },
+      });
+      fs.writeFileSync("index.js", `export default {};`);
+      await expect(
+        runWrangler("dev --assets abc")
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot use Assets and Workers Sites in the same Worker."`
       );
     });
   });

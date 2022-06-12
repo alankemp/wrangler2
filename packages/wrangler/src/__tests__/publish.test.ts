@@ -1404,7 +1404,7 @@ addEventListener('fetch', event => {});`
       expect(std.err).toMatchInlineSnapshot(`""`);
     });
 
-    it("should upload all the files in the directory specified by `--experimental-public`", async () => {
+    it("should upload all the files in the directory specified by `--assets`", async () => {
       const assets = [
         { filePath: "file-1.txt", content: "Content of file-1" },
         { filePath: "file-2.txt", content: "Content of file-2" },
@@ -1425,7 +1425,7 @@ addEventListener('fetch', event => {});`
       mockListKVNamespacesRequest(kvNamespace);
       mockKeyListRequest(kvNamespace.id, []);
       mockUploadAssetsToKVRequest(kvNamespace.id, assets);
-      await runWrangler("publish --experimental-public assets");
+      await runWrangler("publish --assets assets");
 
       expect(std.out).toMatchInlineSnapshot(`
         "Reading file-1.txt...
@@ -1440,19 +1440,19 @@ addEventListener('fetch', event => {});`
       expect(std.err).toMatchInlineSnapshot(`""`);
     });
 
-    it("should error if --experimental-public and --site are used together", async () => {
+    it("should error if --assets and --site are used together", async () => {
       writeWranglerToml({
         main: "./index.js",
       });
       writeWorkerSource();
       await expect(
-        runWrangler("publish --experimental-public abc --site xyz")
+        runWrangler("publish --assets abc --site xyz")
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot use --experimental-public and a Site configuration together."`
+        `"Cannot use Assets and Workers Sites in the same Worker."`
       );
     });
 
-    it("should error if --experimental-public and config.site are used together", async () => {
+    it("should error if --assets and config.site are used together", async () => {
       writeWranglerToml({
         main: "./index.js",
         site: {
@@ -1461,9 +1461,38 @@ addEventListener('fetch', event => {});`
       });
       writeWorkerSource();
       await expect(
-        runWrangler("publish --experimental-public abc")
+        runWrangler("publish --assets abc")
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Cannot use --experimental-public and a Site configuration together."`
+        `"Cannot use Assets and Workers Sites in the same Worker."`
+      );
+    });
+
+    it("should error if config.assets and --site are used together", async () => {
+      writeWranglerToml({
+        main: "./index.js",
+        assets: "abc",
+      });
+      writeWorkerSource();
+      await expect(
+        runWrangler("publish --site xyz")
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot use Assets and Workers Sites in the same Worker."`
+      );
+    });
+
+    it("should error if config.assets and config.site are used together", async () => {
+      writeWranglerToml({
+        main: "./index.js",
+        assets: "abc",
+        site: {
+          bucket: "xyz",
+        },
+      });
+      writeWorkerSource();
+      await expect(
+        runWrangler("publish")
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot use Assets and Workers Sites in the same Worker."`
       );
     });
 
