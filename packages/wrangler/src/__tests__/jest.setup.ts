@@ -75,3 +75,6 @@ jest.mock("../dev/dev", () => {
 // Make sure that we don't accidentally try to open a browser window when running tests.
 // We will actually provide a mock implementation for `openInBrowser()` within relevant tests.
 jest.mock("../open-in-browser");
+
+// Don't output the Bundle Reporter for tests.
+jest.mock("../bundle-reporter");
