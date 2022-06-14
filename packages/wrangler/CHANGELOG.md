@@ -1,5 +1,11 @@
 # wrangler
 
+## 2.0.13
+
+### Patch Changes
+
+- [#1260](https://github.com/cloudflare/wrangler2/pull/1260) [`d8ee04f`](https://github.com/cloudflare/wrangler2/commit/d8ee04f343303e50c976b676cd06075a971081f2) Thanks [@threepointone](https://github.com/threepointone)! - fix: pass env and ctx to request handler when using `--experimental-public`
+
 ## 2.0.12
 
 ### Patch Changes
